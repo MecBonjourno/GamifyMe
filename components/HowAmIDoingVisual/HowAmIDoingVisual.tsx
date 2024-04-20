@@ -42,41 +42,71 @@ export default function HowAmIDoingVisual(): JSX.Element {
         logsByHabitAndDate.set(key, log);
     });
 
+    function renderDataCell(log: HabitLog | undefined): JSX.Element {
+        // Early return for no log case, create random key since there is nothing
+        if (!log) {
+            return <td key={`${Math.random() * 1000}-${Math.random() * 1000}`} className="border-2 border-gray-600 p-2 m-2 hover:font-bold">-</td>;
+        }
+
+        // Initialize text and className with default values
+        let text = log.status.toString();
+        let className = "border-2 p-2 m-2 hover:font-bold";
+
+        // Modify className and text based on the date comparison
+        if (log.date.toDateString() < new Date().toDateString()) {
+            className += " text-gray-400";
+        }
+
+        // Further modify text and className based on `expected` and `quantity`
+        if (log.expected) {
+            if (log.quantity !== undefined) { // Ensure quantity is defined
+                text += ` ${log.quantity}/${log.expected}`;
+                if (log.quantity >= log.expected) {
+                    className += " text-green-600";
+                } else if (log.quantity > 0) {
+                    className += " text-yellow-600";
+                } else {
+                    className += " text-red-600";
+                }
+            }
+        }
+
+        return <td key={`${log.habitId}-${log.date.toDateString()}`} className={className}>{text}</td>;
+    }
+
+
     return (
         <div>
-            <header>
+            <header className="mb-8">
                 <h1 className="text-4xl">How am I doing?</h1>
                 <h2 className="text-2xl">Let's see how you are doing with your habits</h2>
             </header>
             <main>
-                    <table className="w-full">
-                        <thead>
-                            <tr>
-                                <th>Habit</th>
-                                {datesToDisplay.map(date => (
-                                    <th key={date.toDateString()}>{date.toDateString()}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {habits.map(habit => (
-                                <tr key={habit._id}>
-                                    <td className="border-2 border-gray-200 p-2 m-2">{habit.name}</td>
-                                    {datesToDisplay.map(date => {
-
-                                        const log = habitLogs.find(log => log.habitId === habit._id && log.date.toDateString() === date.toDateString());
-                                        
-                                        if(!log){
-                                            return <td key={habit._id} className="border-2 border-gray-600 p-2 m-2">No Log</td>;
-                                        }
-                                        
-                                        return <td key={log._id} className="border-2 border-gray-200 p-2 m-2">{log.expected ? `${log.quantity}/${log.expected}` : log.status }</td>;
-                                    })}
-                                </tr>
+                <table className="w-full">
+                    <thead>
+                        <tr>
+                            <th>Habit</th>
+                            {datesToDisplay.map(date => (
+                                <th key={date.toDateString()}>{new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date)}</th>
                             ))}
-                        </tbody>
-                    </table>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {habits.map(habit => (
+                            <tr key={habit._id} className="transition duration-300 ease-in-out hover:bg-zinc-900">
+                                <td className="border-2 border-gray-200 p-2 m-2 hover:font-bold">{habit.name}</td>
+                                {datesToDisplay.map(date => {
+
+                                    const log = habitLogs.find(log => log.habitId === habit._id && log.date.toDateString() === date.toDateString());
+
+                                    return renderDataCell(log);
+                                })}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </main>
         </div>
     );
 }
+

@@ -23,14 +23,14 @@ export default function HomePage(): JSX.Element {
     }, []);
 
     return (
-        <div >
-            <header>
+        <div className="p-8">
+            <header className="mb-8">
                 <h1 className="text-4xl">Welcome</h1>
                 <h2 className="text-2xl">Let's start getting you better!</h2>
             </header>
             <main>
 
-                <div>
+                {/*<div>
                     <h1>Your habits and logs</h1>
                     {habits.map((habit) => {
                         return <div key={habit._id} className="border-2 border-gray-200 p-2 m-2">
@@ -50,7 +50,7 @@ export default function HomePage(): JSX.Element {
                             </div>
                         </div>
                     })}
-                </div>
+                </div>*/}
 
                 <HowAmIDoingVisual />
             </main>

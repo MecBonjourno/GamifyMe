@@ -5,9 +5,9 @@ export default function Navbar(): JSX.Element {
         <div className="bg-neutral-950">
             <div className="container mx-auto flex justify-between items-center p-4">
                 <div className="text-white text-2xl">GamifyMe</div>
-                <Link href="/landing"> landing </Link>
-                <Link href="/home"> home </Link>
-                <Link href="/register"> register </Link>
+                <Link className="hover:font-bold hover:underline" href="/landing"> landing </Link>
+                <Link className="hover:font-bold hover:underline" href="/home"> home </Link>
+                <Link className="hover:font-bold hover:underline" href="/register"> register </Link>
             </div>
         </div>
     );
