@@ -9,6 +9,8 @@ export interface Habit {
   targetFrequency: Frequencies;
   habitTriggerCron?: string;
   habitLastTriggeredAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export enum Frequencies {

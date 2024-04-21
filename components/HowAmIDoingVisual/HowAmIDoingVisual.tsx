@@ -6,6 +6,18 @@ export default function HowAmIDoingVisual(): JSX.Element {
     const [habits, setHabits] = useState<Habit[]>([]);
     const [habitLogs, setHabitLogs] = useState<HabitLog[]>([]);
 
+    const defaultValues: {
+        startDate: Date,
+        numberOfDaysToDisplay: number,
+        displayPreference: 'weekly' | 'monthly',
+        endDate: Date,
+    } = Object.freeze({
+        startDate: new Date(),
+        numberOfDaysToDisplay: 7,
+        displayPreference: 'weekly',
+        endDate: new Date(new Date().getDate() + 7 - 1),
+    })
+
     useEffect(() => {
         const habitService = new HabitsService();
         Promise.all([habitService.getHabits(), habitService.getLogs()])
@@ -16,12 +28,15 @@ export default function HowAmIDoingVisual(): JSX.Element {
             .catch(error => console.error("Failed to fetch data:", error));
     }, []);
 
-    const displayPreference = 'weekly'; // Could be dynamic based on user input
-    const numberOfDaysToDisplay = displayPreference === 'weekly' ? 7 : 30;
+    const [displayPreference, setDisplayPreference] = useState<'weekly' | 'monthly'>(defaultValues.displayPreference);
+
+    const [numberOfDaysToDisplay, setNumberOfDaysToDisplay] = useState<number>(defaultValues.numberOfDaysToDisplay);
+
+    const [startDate, setStartDate] = useState<Date>(defaultValues.startDate);
+
+    const [endDate, setEndDate] = useState<Date>(defaultValues.endDate);
+
     const today = new Date();
-    const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + numberOfDaysToDisplay - 1);
 
     function getDatesToDisplay(startDate: Date, numberOfDays: number): Date[] {
         const dates = [];
@@ -74,39 +89,81 @@ export default function HowAmIDoingVisual(): JSX.Element {
         return <td key={`${log.habitId}-${log.date.toDateString()}`} className={className}>{text}</td>;
     }
 
+    function onMoveDateBackward() {
+        switch (displayPreference) {
+            case 'weekly':
+                setStartDate(new Date(startDate.setDate(startDate.getDate() - 7)));
+                setEndDate(new Date(endDate.setDate(endDate.getDate() - 7)));
+                break;
+            case 'monthly':
+                setStartDate(new Date(startDate.setMonth(startDate.getMonth() - 1)));
+                setEndDate(new Date(endDate.setMonth(endDate.getMonth() - 1)));
+                break;
+        }
+    }
 
-    return (
-        <div>
-            <header className="mb-8">
-                <h1 className="text-4xl">How am I doing?</h1>
-                <h2 className="text-2xl">Let's see how you are doing with your habits</h2>
-            </header>
-            <main>
-                <table className="w-full">
-                    <thead>
-                        <tr>
-                            <th>Habit</th>
-                            {datesToDisplay.map(date => (
-                                <th key={date.toDateString()}>{new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date)}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {habits.map(habit => (
-                            <tr key={habit._id} className="transition duration-300 ease-in-out hover:bg-zinc-900">
-                                <td className="border-2 border-gray-200 p-2 m-2 hover:font-bold">{habit.name}</td>
-                                {datesToDisplay.map(date => {
+    function onMoveDateForward() {
+        switch (displayPreference) {
+            case 'weekly':
+                setStartDate(new Date(startDate.setDate(startDate.getDate() + 7)));
+                setEndDate(new Date(endDate.setDate(endDate.getDate() + 7)));
+                break;
+            case 'monthly':
+                setStartDate(new Date(startDate.setMonth(startDate.getMonth() + 1)));
+                setEndDate(new Date(endDate.setMonth(endDate.getMonth() + 1)));
+                break;
+        }
+    }
 
-                                    const log = habitLogs.find(log => log.habitId === habit._id && log.date.toDateString() === date.toDateString());
+    function renderStartAndEndDate() : JSX.Element {
+        switch (displayPreference) {
 
-                                    return renderDataCell(log);
-                                })}
-                            </tr>
+            case 'weekly':
+                return <p>{startDate.getDate()} - {endDate.getDate()} {new Intl.DateTimeFormat("en-US", { month: "long" }).format(endDate)}</p>;
+
+            case 'monthly':
+                return <p>{new Intl.DateTimeFormat("en-US", { month: "long" }).format(startDate)}</p>;
+        }
+    }
+
+
+return (
+    <div>
+        <main>
+            <div className="flex justify-between w-full p-4">
+                <button onClick={onMoveDateBackward} className="hover:cursor-pointer hover:font-bold"> {"<"} </button>
+                <select className="bg-black" value={displayPreference} onChange={e => setDisplayPreference(e.target.value as 'weekly' | 'monthly')}>
+                    <option className="bg-black" value="weekly"> Week </option>
+                    <option className="bg-black" value="monthly">Month</option>
+                </select>
+                {renderStartAndEndDate()}
+                <p onClick={onMoveDateForward} className="hover:cursor-pointer hover:font-bold"> {">"} </p>
+            </div>
+            <table className="w-full">
+                <thead>
+                    <tr>
+                        <th>Habit</th>
+                        {datesToDisplay.map(date => (
+                            <th key={date.toDateString()}>{new Intl.DateTimeFormat("en-US", { weekday: "narrow" }).format(date)}</th>
                         ))}
-                    </tbody>
-                </table>
-            </main>
-        </div>
-    );
+                    </tr>
+                </thead>
+                <tbody>
+                    {habits.map(habit => (
+                        <tr key={habit._id} className="transition duration-300 ease-in-out hover:bg-zinc-900">
+                            <td className="border-2 border-gray-200 p-2 m-2 hover:font-bold">{habit.name}</td>
+                            {datesToDisplay.map(date => {
+
+                                const log = habitLogs.find(log => log.habitId === habit._id && log.date.toDateString() === date.toDateString());
+
+                                return renderDataCell(log);
+                            })}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </main>
+    </div>
+);
 }
 
