@@ -56,13 +56,19 @@ export interface Achievement {
   name: string;
   description: string;
   type: AchievementType;
-  userId: string;
+  imageUrl?: string;
   habitId?: string;
+  endDate?: Date;
+}
+
+export interface AchievementLog {
+  _id: string;
+  achievementId: string;
   date: Date;
+  complete: boolean;
 }
 
 export enum AchievementType {
-  Habit = 'Habit',
-  Milestone = 'Milestone',
-  Custom = 'Custom'
+  Repeatable = 'Repeatable',
+  OneTime = 'OneTime'
 }

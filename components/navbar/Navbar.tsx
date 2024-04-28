@@ -7,7 +7,7 @@ export default function Navbar(): JSX.Element {
                 <div className="text-white text-2xl">GamifyMe</div>
                 <Link className="hover:font-bold hover:underline" href="/landing"> landing </Link>
                 <Link className="hover:font-bold hover:underline" href="/home"> home </Link>
-                <Link className="hover:font-bold hover:underline" href="/register"> register </Link>
+                <Link className="hover:font-bold hover:underline" href="/achievements"> achievements </Link>
             </div>
         </div>
     );
